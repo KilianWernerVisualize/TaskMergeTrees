@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -e # abort on error
+set -x # verbose output
+
+export HPX_VERSION="1.4.1"
+
+mkdir hpx-source
+
+curl -L https://github.com/STEllAR-GROUP/hpx/archive/${HPX_VERSION}.tar.gz | tar zx -C hpx-source --strip-components 1
+
+mkdir hpx-build
+pushd hpx-build
+
+cmake -G Ninja \
+      -D CMAKE_INSTALL_PREFIX=/usr \
+      -D HPX_WITH_MALLOC=tcmalloc \
+      -D HPX_WITH_CXX14=ON \
+      -D HPX_WITH_EXAMPLES=ON \
+      -D HPX_WITH_TESTS=OFF \
+      -D HPX_WITH_PAPI=ON \
+      ../hpx-source
+
+cmake --build . --target install
+
+popd
