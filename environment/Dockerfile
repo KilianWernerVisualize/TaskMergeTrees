@@ -1,4 +1,4 @@
-# hash:sha256:f555575891b49e3d8f20397cf3423c5ed4b1fb702d6f8bbf808afcce8c022d5f
+# hash:sha256:b5a13d115a5a7c15a31e4a0e3bdf8e213e701321134427f060c21b35a190e1da
 FROM registry.codeocean.com/codeocean/ubuntu:18.04.3
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -27,7 +27,7 @@ RUN apt-get update \
         libpng-dev=1.6.34-1ubuntu0.18.04.2 \
         libsnappy-dev=1.1.7-1 \
         libtbb-dev=2017~U7-8 \
-        libvtk7-dev \
+        libvtk7-dev=7.1.1+dfsg1-2 \
         ninja-build=1.8.2-1 \
         python=2.7.15~rc1-1 \
         unzip=6.0-21ubuntu1 \
