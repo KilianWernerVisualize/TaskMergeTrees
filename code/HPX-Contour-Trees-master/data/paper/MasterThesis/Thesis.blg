@@ -1,0 +1,48 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Thesis.aux
+The style file: plain.bst
+Database file #1: bib.bib
+Warning--I didn't find a database entry for "origin"
+You've used 13 entries,
+            2118 wiz_defined-function locations,
+            581 strings with 6092 characters,
+and the built_in function-call counts, 4443 in all, are:
+= -- 423
+> -- 225
+< -- 3
++ -- 90
+- -- 76
+* -- 305
+:= -- 752
+add.period$ -- 44
+call.type$ -- 13
+change.case$ -- 77
+chr.to.int$ -- 0
+cite$ -- 13
+duplicate$ -- 175
+empty$ -- 353
+format.name$ -- 76
+if$ -- 939
+int.to.chr$ -- 0
+int.to.str$ -- 13
+missing$ -- 13
+newline$ -- 69
+num.names$ -- 26
+pop$ -- 85
+preamble$ -- 1
+purify$ -- 64
+quote$ -- 0
+skip$ -- 111
+stack$ -- 0
+substring$ -- 208
+swap$ -- 36
+text.length$ -- 3
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 52
+warning$ -- 0
+while$ -- 38
+width$ -- 15
+write$ -- 145
+(There was 1 warning)

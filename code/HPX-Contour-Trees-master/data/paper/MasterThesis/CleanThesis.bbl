@@ -1,0 +1,463 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 2.8 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\sortlist[entry]{nty/global/}
+  \entry{flatset}{article}{}
+    \name{author}{1}{}{%
+      {{hash=AMH}{%
+         family={Austern},
+         familyi={A\bibinitperiod},
+         given={M.\bibnamedelima H.},
+         giveni={M\bibinitperiod\bibinitdelim H\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{AMH1}
+    \strng{fullhash}{AMH1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{A}
+    \field{sortinithash}{A}
+    \field{title}{Why You Shouldn't Use set - and What You Should Use Instead}
+    \field{type}{~}
+    \field{journaltitle}{C++ Report 12:4}
+    \field{year}{2000}
+    \warn{\item Invalid format of field 'month'}
+  \endentry
+
+  \entry{base}{article}{}
+    \name{author}{1}{}{%
+      {{hash=BT}{%
+         family={Banchoff},
+         familyi={B\bibinitperiod},
+         given={Thomas},
+         giveni={T\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Lehigh University}%
+    }
+    \strng{namehash}{BT1}
+    \strng{fullhash}{BT1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{B}
+    \field{sortinithash}{B}
+    \verb{doi}
+    \verb 10.4310/jdg/1214428092
+    \endverb
+    \field{number}{3-4}
+    \field{pages}{245\bibrangedash 256}
+    \field{title}{Critical points and curvature for embedded polyhedra}
+    \verb{url}
+    \verb https://doi.org/10.4310/jdg/1214428092
+    \endverb
+    \field{volume}{1}
+    \field{journaltitle}{J. Differential Geom.}
+    \field{year}{1967}
+  \endentry
+
+  \entry{Carr}{inproceedings}{}
+    \name{author}{4}{}{%
+      {{hash=CHA}{%
+         family={Carr},
+         familyi={C\bibinitperiod},
+         given={H.\bibnamedelima A.},
+         giveni={H\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+      {{hash=WGH}{%
+         family={Weber},
+         familyi={W\bibinitperiod},
+         given={G.\bibnamedelima H.},
+         giveni={G\bibinitperiod\bibinitdelim H\bibinitperiod},
+      }}%
+      {{hash=SCM}{%
+         family={Sewell},
+         familyi={S\bibinitperiod},
+         given={C.\bibnamedelima M.},
+         giveni={C\bibinitperiod\bibinitdelim M\bibinitperiod},
+      }}%
+      {{hash=AJP}{%
+         family={Ahrens},
+         familyi={A\bibinitperiod},
+         given={J.\bibnamedelima P.},
+         giveni={J\bibinitperiod\bibinitdelim P\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IEEE}%
+    }
+    \strng{namehash}{CHA+1}
+    \strng{fullhash}{CHAWGHSCMAJP1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{C}
+    \field{sortinithash}{C}
+    \field{booktitle}{IEEE Symposium on Large Data Analysis and Visualization
+  2016, LDAV 2016}
+    \field{isbn}{978-1-5090-5659-0}
+    \field{title}{Parallel peak pruning for scalable SMP contour tree
+  computation}
+    \field{year}{2016}
+  \endentry
+
+  \entry{orig}{article}{}
+    \name{author}{3}{}{%
+      {{hash=CH}{%
+         family={Carr},
+         familyi={C\bibinitperiod},
+         given={Hamish},
+         giveni={H\bibinitperiod},
+      }}%
+      {{hash=SJ}{%
+         family={Snoeyink},
+         familyi={S\bibinitperiod},
+         given={Jack},
+         giveni={J\bibinitperiod},
+      }}%
+      {{hash=AU}{%
+         family={Axen},
+         familyi={A\bibinitperiod},
+         given={Ulrike},
+         giveni={U\bibinitperiod},
+      }}%
+    }
+    \keyw{Iso-surfaces, Simplicial meshes, Morse theory, Resolving
+  singularities}
+    \strng{namehash}{CH+1}
+    \strng{fullhash}{CHSJAU1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{C}
+    \field{sortinithash}{C}
+    \verb{doi}
+    \verb https://doi.org/10.1016/S0925-7721(02)00093-7
+    \endverb
+    \field{issn}{0925-7721}
+    \field{note}{Special Issue on the Fourth CGC Workshop on Computational
+  Geometry}
+    \field{number}{2}
+    \field{pages}{75 \bibrangedash  94}
+    \field{title}{Computing contour trees in all dimensions}
+    \verb{url}
+    \verb http://www.sciencedirect.com/science/article/pii/S0925772102000937
+    \endverb
+    \field{volume}{24}
+    \field{journaltitle}{Computational Geometry}
+    \field{year}{2003}
+  \endentry
+
+  \entry{Charles}{inproceedings}{}
+    \name{author}{4}{}{%
+      {{hash=GC}{%
+         family={Gueunet},
+         familyi={G\bibinitperiod},
+         given={C.},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=FP}{%
+         family={Fortin},
+         familyi={F\bibinitperiod},
+         given={P.},
+         giveni={P\bibinitperiod},
+      }}%
+      {{hash=JJ}{%
+         family={Jomier},
+         familyi={J\bibinitperiod},
+         given={J.},
+         giveni={J\bibinitperiod},
+      }}%
+      {{hash=V}{%
+         family={Vijay},
+         familyi={V\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IEEE}%
+    }
+    \strng{namehash}{GC+1}
+    \strng{fullhash}{GCFPJJV1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{booktitle}{IEEE Symposium on Large Data Analysis and Visualization
+  2016, LDAV 2016}
+    \field{isbn}{978-1-5090-5659-0}
+    \field{title}{Contour forests: Fast multi-threaded augmented contour trees}
+    \field{year}{2016}
+  \endentry
+
+  \entry{FTM}{inproceedings}{}
+    \name{author}{4}{}{%
+      {{hash=GC}{%
+         family={Gueunet},
+         familyi={G\bibinitperiod},
+         given={C.},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=FP}{%
+         family={Fortin},
+         familyi={F\bibinitperiod},
+         given={P.},
+         giveni={P\bibinitperiod},
+      }}%
+      {{hash=JJ}{%
+         family={Jomier},
+         familyi={J\bibinitperiod},
+         given={J.},
+         giveni={J\bibinitperiod},
+      }}%
+      {{hash=TJ}{%
+         family={Tierny},
+         familyi={T\bibinitperiod},
+         given={J.},
+         giveni={J\bibinitperiod},
+      }}%
+    }
+    \keyw{parallel algorithms;shared memory systems;trees
+  (mathematics);Fibonacci heaps;OpenMP task runtime;augmented contour tree
+  computation;data segmentation applications;existing parallel algorithms;fast,
+  shared memory multicore computation;lightweight VTK-based C++
+  implementation;task-based augmented merge trees;Algorithm design and
+  analysis;Data analysis;Data visualization;Electronic mail;Feature
+  extraction;Runtime}
+    \strng{namehash}{GC+1}
+    \strng{fullhash}{GCFPJJTJ1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{booktitle}{2017 IEEE 7th Symposium on Large Data Analysis and
+  Visualization (LDAV)}
+    \verb{doi}
+    \verb 10.1109/LDAV.2017.8231846
+    \endverb
+    \field{pages}{6\bibrangedash 15}
+    \field{title}{Task-based augmented merge trees with Fibonacci heaps}
+    \field{year}{2017}
+    \warn{\item Invalid format of field 'month'}
+  \endentry
+
+  \entry{megakernel}{article}{}
+    \name{author}{3}{}{%
+      {{hash=LS}{%
+         family={Laine},
+         familyi={L\bibinitperiod},
+         given={Samuli},
+         giveni={S\bibinitperiod},
+      }}%
+      {{hash=KT}{%
+         family={Karras},
+         familyi={K\bibinitperiod},
+         given={Tero},
+         giveni={T\bibinitperiod},
+      }}%
+      {{hash=AT}{%
+         family={Aila},
+         familyi={A\bibinitperiod},
+         given={Timo},
+         giveni={T\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{LS+1}
+    \strng{fullhash}{LSKTAT1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{L}
+    \field{sortinithash}{L}
+    \field{title}{Megakernels Considered Harmful: Wavefront Path Tracing on
+  GPUs}
+    \field{journaltitle}{High-Performance Graphics}
+    \field{year}{2013}
+    \warn{\item Invalid format of field 'month'}
+  \endentry
+
+  \entry{Maadasamy}{inproceedings}{}
+    \name{author}{6}{}{%
+      {{hash=M}{%
+         family={Maadasamy},
+         familyi={M\bibinitperiod},
+      }}%
+      {{hash=S}{%
+         family={Senthilnathan},
+         familyi={S\bibinitperiod},
+      }}%
+      {{hash=D}{%
+         family={Doraiswamy},
+         familyi={D\bibinitperiod},
+      }}%
+      {{hash=H}{%
+         family={Harish},
+         familyi={H\bibinitperiod},
+      }}%
+      {{hash=N}{%
+         family={Natarajan},
+         familyi={N\bibinitperiod},
+      }}%
+      {{hash=V}{%
+         family={Vijay},
+         familyi={V\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IEEE Computer Society}%
+    }
+    \keyw{dblp}
+    \strng{namehash}{M+1}
+    \strng{fullhash}{MSDHNV1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{M}
+    \field{sortinithash}{M}
+    \field{booktitle}{HiPC}
+    \field{isbn}{978-1-4673-2372-7}
+    \field{pages}{1\bibrangedash 10}
+    \field{title}{A hybrid parallel algorithm for computing and tracking level
+  set topology.}
+    \verb{url}
+    \verb http://dblp.uni-trier.de/db/conf/hipc/hipc2012.html#MaadasamyDN12
+    \endverb
+    \field{year}{2012}
+  \endentry
+
+  \entry{Morozov}{inproceedings}{}
+    \name{author}{2}{}{%
+      {{hash=MD}{%
+         family={Morozov},
+         familyi={M\bibinitperiod},
+         given={D.},
+         giveni={D\bibinitperiod},
+      }}%
+      {{hash=WG}{%
+         family={Weber},
+         familyi={W\bibinitperiod},
+         given={G.},
+         giveni={G\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{MDWG1}
+    \strng{fullhash}{MDWG1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{M}
+    \field{sortinithash}{M}
+    \field{booktitle}{Topological Methods in Data Analysis and Visualization
+  III}
+    \field{pages}{89\bibrangedash 102}
+    \field{title}{Distributed Contour Trees}
+    \verb{url}
+    \verb http://escholarship.org/uc/item/9k99z474
+    \endverb
+    \field{year}{2014}
+  \endentry
+
+  \entry{skiplist}{article}{}
+    \name{author}{1}{}{%
+      {{hash=PW}{%
+         family={Pugh},
+         familyi={P\bibinitperiod},
+         given={W.},
+         giveni={W\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{PW1}
+    \strng{fullhash}{PW1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{P}
+    \field{sortinithash}{P}
+    \field{title}{Concurrent Maintenance of Skip Lists}
+    \field{type}{Technical Report}
+    \field{journaltitle}{Institute for Advanced Computer Studies, Department of
+  Computer Science, University of Maryland, College Park, CS-TR-2222.1}
+    \field{year}{1989}
+  \endentry
+
+  \entry{adhoc}{inproceedings}{}
+    \name{author}{5}{}{%
+      {{hash=SR}{%
+         family={Sarkar},
+         familyi={S\bibinitperiod},
+         given={R.},
+         giveni={R\bibinitperiod},
+      }}%
+      {{hash=ZX}{%
+         family={Zhu},
+         familyi={Z\bibinitperiod},
+         given={X.},
+         giveni={X\bibinitperiod},
+      }}%
+      {{hash=GJ}{%
+         family={Gao},
+         familyi={G\bibinitperiod},
+         given={J.},
+         giveni={J\bibinitperiod},
+      }}%
+      {{hash=GLJ}{%
+         family={Guibas},
+         familyi={G\bibinitperiod},
+         given={L.\bibnamedelima J.},
+         giveni={L\bibinitperiod\bibinitdelim J\bibinitperiod},
+      }}%
+      {{hash=MJ}{%
+         family={Mitchell},
+         familyi={M\bibinitperiod},
+         given={J.S.B.},
+         giveni={J\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {IEEE}%
+    }
+    \strng{namehash}{SR+1}
+    \strng{fullhash}{SRZXGJGLJMJ1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{S}
+    \field{sortinithash}{S}
+    \field{booktitle}{INFOCOM 2008. The 27th Conference on Computer
+  Communications}
+    \field{isbn}{978-1-4244-2025-4}
+    \field{title}{Iso-Contour Queries and Gradient Descent with Guaranteed
+  Delivery in Sensor Networks}
+    \field{year}{2008}
+  \endentry
+
+  \entry{pascucci1}{article}{}
+    \name{author}{1}{}{%
+      {{hash=VPKCM}{%
+         family={V.\bibnamedelima Pascucci},
+         familyi={V\bibinitperiod\bibinitdelim P\bibinitperiod},
+         given={K.\bibnamedelima Cole-McLaughlin},
+         giveni={K\bibinitperiod\bibinitdelim C\bibinitperiod-M\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{VPKCM1}
+    \strng{fullhash}{VPKCM1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{sortinit}{V}
+    \field{sortinithash}{V}
+    \field{pages}{249\bibrangedash 268}
+    \field{title}{Parallel Computation of the Topology of Level Sets}
+    \field{volume}{38(1)}
+    \field{journaltitle}{Algorithmica}
+    \field{year}{2003}
+  \endentry
+\endsortlist
+\endinput

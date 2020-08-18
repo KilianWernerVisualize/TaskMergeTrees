@@ -1,0 +1,69 @@
+\contentsline {section}{\numberline {1}Introduction}{1}
+\contentsline {section}{\numberline {2}Establishing a Theoretical Basis}{2}
+\contentsline {subsection}{\numberline {2.1}Merge Tree Definition}{2}
+\contentsline {paragraph}{\nonumberline Minima/Extrema}{2}
+\contentsline {paragraph}{\nonumberline Join Nodes/Saddles}{3}
+\contentsline {subsection}{\numberline {2.2}Augmented Merge Tree and Scope}{3}
+\contentsline {paragraph}{\nonumberline Augmented Merge Tree}{3}
+\contentsline {subsection}{\numberline {2.3}Decentralized Observations}{4}
+\contentsline {subsubsection}{\numberline {2.3.1}Identifying Extrema}{4}
+\contentsline {subsubsection}{\numberline {2.3.2}Identifying Saddles}{4}
+\contentsline {paragraph}{\nonumberline First Condition}{4}
+\contentsline {subsubsection}{\numberline {2.3.3}Identifying Arcs}{5}
+\contentsline {paragraph}{\nonumberline Lemma 1}{5}
+\contentsline {paragraph}{\nonumberline Proof Concept}{6}
+\contentsline {paragraph}{\nonumberline Lemma 1.1}{6}
+\contentsline {paragraph}{\nonumberline Proof Concept}{6}
+\contentsline {paragraph}{\nonumberline Second Condition}{6}
+\contentsline {paragraph}{\nonumberline Third (final) Condition}{6}
+\contentsline {paragraph}{\nonumberline Proof Concept}{6}
+\contentsline {paragraph}{\nonumberline Lemma 2}{7}
+\contentsline {paragraph}{\nonumberline Proof Concept}{7}
+\contentsline {subsection}{\numberline {2.4}Global Ordering and Local Ordering}{8}
+\contentsline {subsection}{\numberline {2.5}The Limitations of Ordering}{8}
+\contentsline {subsection}{\numberline {2.6}The Need for Ordering?}{9}
+\contentsline {subsection}{\numberline {2.7}Ascending Manifold Boundary}{10}
+\contentsline {paragraph}{\nonumberline Lemma 3}{10}
+\contentsline {paragraph}{\nonumberline Concept of Proof}{10}
+\contentsline {paragraph}{\nonumberline Lemma 4}{10}
+\contentsline {paragraph}{\nonumberline Concept of Proof}{10}
+\contentsline {section}{\numberline {3}Related Work}{12}
+\contentsline {paragraph}{\nonumberline Sequential Basis}{12}
+\contentsline {paragraph}{\nonumberline The first approach}{12}
+\contentsline {paragraph}{\nonumberline Domain space subdivision}{12}
+\contentsline {paragraph}{\nonumberline Distributed Contour Trees}{12}
+\contentsline {paragraph}{\nonumberline Sweep to Saddle}{13}
+\contentsline {paragraph}{\nonumberline Maximum lists and path lists}{13}
+\contentsline {paragraph}{\nonumberline Peak Pruning}{13}
+\contentsline {paragraph}{\nonumberline Task-Parallel Merge Trees with Fibonacci Heaps}{13}
+\contentsline {section}{\numberline {4}PUMA Design and Consequences of an Unordered Approach}{14}
+\contentsline {subsection}{\numberline {4.1}General Structure}{14}
+\contentsline {subsection}{\numberline {4.2}Growing the Boundary}{15}
+\contentsline {subsection}{\numberline {4.3}Relation to Union-Find}{16}
+\contentsline {subsection}{\numberline {4.4}Augmentation and Ascending Manifolds}{17}
+\contentsline {subsection}{\numberline {4.5}Merging the Components}{18}
+\contentsline {subsection}{\numberline {4.6}Trunk Skipping}{19}
+\contentsline {section}{\numberline {5}PUMA Implementation Details}{20}
+\contentsline {subsection}{\numberline {5.1}Task-Parallelism}{20}
+\contentsline {subsection}{\numberline {5.2}Global Data Structures}{20}
+\contentsline {subsubsection}{\numberline {5.2.1}Output - Merge Tree}{21}
+\contentsline {subsubsection}{\numberline {5.2.2}Union Find Datastructure}{21}
+\contentsline {subsection}{\numberline {5.3}Boundary Data Structure}{22}
+\contentsline {subsection}{\numberline {5.4}Augmentation Data Structure}{23}
+\contentsline {section}{\numberline {6}PUMA Performance Analysis}{24}
+\contentsline {subsection}{\numberline {6.1}Scalability with Problem Size and Resources}{25}
+\contentsline {subsection}{\numberline {6.2}Runtime Comparisons}{27}
+\contentsline {subsection}{\numberline {6.3}Conclusion}{28}
+\contentsline {section}{\numberline {7}GPUMA}{29}
+\contentsline {subsection}{\numberline {7.1}Round Based vs. Megakernel}{29}
+\contentsline {subsection}{\numberline {7.2}Structure}{29}
+\contentsline {subsubsection}{\numberline {7.2.1}Minimum Search}{29}
+\contentsline {subsubsection}{\numberline {7.2.2}Arc Growth}{30}
+\contentsline {subsubsection}{\numberline {7.2.3}Making Boundaries Implicit}{30}
+\contentsline {subsubsection}{\numberline {7.2.4}Extracting Boundary Intersections}{30}
+\contentsline {subsubsection}{\numberline {7.2.5}Making Union-Find Compressed}{30}
+\contentsline {subsection}{\numberline {7.3}Sustaining Large Arcs Through Rounds}{31}
+\contentsline {subsection}{\numberline {7.4}Memory Layout}{31}
+\contentsline {subsection}{\numberline {7.5}Passing Back to CPU}{31}
+\contentsline {subsection}{\numberline {7.6}GPUMA Performance Comparison}{32}
+\contentsline {section}{\numberline {8}Conclusion and Future Work}{32}

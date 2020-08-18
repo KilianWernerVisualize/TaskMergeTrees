@@ -1,0 +1,5 @@
+build
+cmake
+*.user*
+.ipynb_checkpoints/DataSetResults-checkpoint.ipynb
+/paper/notebooks/.ipynb_checkpoints/DataSetResults-checkpoint.ipynb

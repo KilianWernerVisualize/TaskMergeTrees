@@ -1,0 +1,47 @@
+\BOOKMARK [0][]{Cover.0}{Cover}{}% 1
+\BOOKMARK [0][]{Titlepage.0}{Titlepage}{}% 2
+\BOOKMARK [0][]{chapter.1}{1 Introduction}{}% 3
+\BOOKMARK [0][]{chapter.2}{2 Establishing a Theoretical Basis}{}% 4
+\BOOKMARK [1][]{section*.3}{2.1 Merge Tree Definition}{chapter.2}% 5
+\BOOKMARK [1][]{section*.4}{2.2 Augmented Merge Tree and Scope}{chapter.2}% 6
+\BOOKMARK [1][]{section*.6}{2.3 Decentralized Observations}{chapter.2}% 7
+\BOOKMARK [2][]{section*.7}{2.3.1 Identifying Extrema}{section*.6}% 8
+\BOOKMARK [2][]{section*.8}{2.3.2 Identifying Saddles}{section*.6}% 9
+\BOOKMARK [2][]{section*.10}{2.3.3 Identifying Arcs}{section*.6}% 10
+\BOOKMARK [1][]{section*.12}{2.4 Global Ordering and Local Ordering}{chapter.2}% 11
+\BOOKMARK [1][]{section*.13}{2.5 The Limitations of Ordering}{chapter.2}% 12
+\BOOKMARK [1][]{section*.14}{2.6 The Need for Ordering?}{chapter.2}% 13
+\BOOKMARK [1][]{section*.15}{2.7 Ascending Manifold Boundary}{chapter.2}% 14
+\BOOKMARK [0][]{chapter.3}{3 Related Work}{}% 15
+\BOOKMARK [0][]{chapter.4}{4 PUMA Design and Consequences of an Unordered Approach}{}% 16
+\BOOKMARK [1][]{section*.19}{4.1 General Structure}{chapter.4}% 17
+\BOOKMARK [1][]{section*.21}{4.2 Growing the Boundary}{chapter.4}% 18
+\BOOKMARK [1][]{section*.23}{4.3 Relation to Union-Find}{chapter.4}% 19
+\BOOKMARK [1][]{section*.24}{4.4 Augmentation and Ascending Manifolds}{chapter.4}% 20
+\BOOKMARK [1][]{section*.25}{4.5 Merging the Components}{chapter.4}% 21
+\BOOKMARK [1][]{section*.27}{4.6 Trunk Skipping}{chapter.4}% 22
+\BOOKMARK [0][]{chapter.5}{5 PUMA Implementation Details}{}% 23
+\BOOKMARK [1][]{section*.29}{5.1 Task-Parallelism}{chapter.5}% 24
+\BOOKMARK [1][]{section*.30}{5.2 Global Data Structures}{chapter.5}% 25
+\BOOKMARK [2][]{section*.31}{5.2.1 Output - Merge Tree}{section*.30}% 26
+\BOOKMARK [2][]{section*.32}{5.2.2 Union Find Datastructure}{section*.30}% 27
+\BOOKMARK [1][]{section*.33}{5.3 Boundary Data Structure}{chapter.5}% 28
+\BOOKMARK [1][]{section*.34}{5.4 Augmentation Data Structure}{chapter.5}% 29
+\BOOKMARK [0][]{chapter.6}{6 PUMA Performance Analysis}{}% 30
+\BOOKMARK [1][]{section*.37}{6.1 Scalability with Problem Size and Resources}{chapter.6}% 31
+\BOOKMARK [1][]{section*.39}{6.2 Runtime Comparisons}{chapter.6}% 32
+\BOOKMARK [1][]{section*.41}{6.3 Conclusion}{chapter.6}% 33
+\BOOKMARK [0][]{chapter.7}{7 GPUMA}{}% 34
+\BOOKMARK [1][]{section*.43}{7.1 Round Based vs. Megakernel}{chapter.7}% 35
+\BOOKMARK [1][]{section*.44}{7.2 Structure}{chapter.7}% 36
+\BOOKMARK [2][]{section*.45}{7.2.1 Minimum Search}{section*.44}% 37
+\BOOKMARK [2][]{section*.46}{7.2.2 Arc Growth}{section*.44}% 38
+\BOOKMARK [2][]{section*.47}{7.2.3 Making Boundaries Implicit}{section*.44}% 39
+\BOOKMARK [2][]{section*.48}{7.2.4 Extracting Boundary Intersections}{section*.44}% 40
+\BOOKMARK [2][]{section*.49}{7.2.5 Making Union-Find Compressed}{section*.44}% 41
+\BOOKMARK [1][]{section*.50}{7.3 Sustaining Large Arcs Through Rounds}{chapter.7}% 42
+\BOOKMARK [1][]{section*.51}{7.4 Memory Layout}{chapter.7}% 43
+\BOOKMARK [1][]{section*.52}{7.5 Passing Back to CPU}{chapter.7}% 44
+\BOOKMARK [1][]{section*.54}{7.6 GPUMA Performance Comparison}{chapter.7}% 45
+\BOOKMARK [0][]{chapter.8}{8 Conclusion and Future Work}{}% 46
+\BOOKMARK [0][]{chapter*.56}{Bibliography}{}% 47

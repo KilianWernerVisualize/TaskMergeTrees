@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -ex
+
+mkdir build
+pushd build
+
+cmake -G Ninja \
+      -DCMAKE_BUILD_TYPE=Release \
+      ../HPX-Contour-Trees-master/HPX-local
+
+cmake --build .
+
+./hpxct-local \
+	-Ihpx.stacks.use_guard_pages=0 \
+	--input /data/ctBones.vti \
+   	| tee /results/output
+
+popd
+
