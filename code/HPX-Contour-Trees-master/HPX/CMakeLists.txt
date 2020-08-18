@@ -12,7 +12,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 #add_definitions(-DHPXIC_ENABLE_APEX=ON)
 add_definitions(-DFLATAUGMENTATION)
 #add_definitions(-DFILEOUT)
-#add_definitions(-DVTIOUT)
+add_definitions(-DVTIOUT)
 #add_definitions(-DLAZYREMOTECALLS)
 #add_definitions(-DENABLE_APEX_PROFILING)
 

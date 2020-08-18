@@ -105,30 +105,6 @@ public:
         return *this;
     }
 
-    // 2D GLM vectors
-    template <typename T, glm::precision P = glm::defaultp>
-    Log& operator<<(const glm::tvec2<T, P>& v)
-    {
-        this->buffer << "(" << v.x << ", " << v.y << ")";
-        return *this;
-    }
-
-    // 3D GLM vectors
-    template <typename T, glm::precision P = glm::defaultp>
-    Log& operator<<(const glm::tvec3<T, P>& v)
-    {
-        this->buffer << "(" << v.x << ", " << v.y << ", " << v.z << ")";
-        return *this;
-    }
-
-    // 4D GLM vectors
-    template <typename T, glm::precision P = glm::defaultp>
-    Log& operator<<(const glm::tvec4<T, P>& v)
-    {
-        this->buffer << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
-        return *this;
-    }
-
     // std::vector
     template <typename T>
     Log& operator<<(const std::vector<T>& v)

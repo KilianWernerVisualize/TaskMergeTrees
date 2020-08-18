@@ -417,13 +417,13 @@ protected:
 
         // Print info
         if (blockIndex == 0) {
-            Log() << "Grid size: " << this->gridSize;
-            Log() << "Num blocks: " << this->numBlocks;
+            Log() << "Grid size: (" << this->gridSize.x << ", " << this->gridSize.y << ", " << this->gridSize.z << ")";
+            Log() << "Num blocks: (" << this->numBlocks.x << ", " << this->numBlocks.y << ", " << this->numBlocks.z << ")";;
             Log() << "Vertices: " << this->getNumVertices();
         }
-        Log().tag(std::to_string(blockIndex)) << "Block index: " << this->blockIndex3D;
-        Log().tag(std::to_string(blockIndex)) << "Block offset: " << this->blockOffsetWithGhost;
-        Log().tag(std::to_string(blockIndex)) << "Block size: " << this->blockSizeWithGhost;
+        Log().tag(std::to_string(blockIndex)) << "Block index: (" << this->blockIndex3D.x << ", " << this->blockIndex3D.y << ", " << this->blockIndex3D.z << ")";
+        Log().tag(std::to_string(blockIndex)) << "Block offset: (" << this->blockOffsetWithGhost.x << ", " << this->blockOffsetWithGhost.y << ", " << this->blockOffsetWithGhost.z << ")";
+        Log().tag(std::to_string(blockIndex)) << "Block size: (" << this->blockSizeWithGhost.x << ", " << this->blockSizeWithGhost.y << ", " << this->blockSizeWithGhost.z << ")";
         Log().tag(std::to_string(blockIndex)) << "Vertices (local): " << this->getNumVerticesLocal(false);
         Log().tag(std::to_string(blockIndex)) << "Vertices (ghost): " << this->getNumVerticesLocal(true) - this->getNumVerticesLocal(false);
 

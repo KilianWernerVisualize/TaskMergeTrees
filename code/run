@@ -6,14 +6,16 @@ pushd build
 
 cmake -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
-      ../HPX-Contour-Trees-master/HPX-local
+      ../HPX-Contour-Trees-master/HPX
 
 cmake --build .
 
-./hpxct-local \
+./hpxct \
 	-Ihpx.stacks.use_guard_pages=0 \
-	--input /data/ctBones.vti \
+    /data/ctBones.vti \
    	| tee /results/output
+
+cp output_0.vti /results/
 
 popd
 
