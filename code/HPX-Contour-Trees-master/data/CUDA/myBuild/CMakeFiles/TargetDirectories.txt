@@ -1,3 +1,0 @@
-/home/kilian/CT/HPX-Contour-Trees/CUDA/myBuild/CMakeFiles/rebuild_cache.dir
-/home/kilian/CT/HPX-Contour-Trees/CUDA/myBuild/CMakeFiles/cudact.dir
-/home/kilian/CT/HPX-Contour-Trees/CUDA/myBuild/CMakeFiles/edit_cache.dir
