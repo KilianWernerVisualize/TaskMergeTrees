@@ -74,8 +74,6 @@ void TreeConstructor::init(const std::vector<hpx::id_type>& treeConstructors, co
     this->postProcessing.reset();
     this->trunkStarted.reset();
 
-    graph.init("graph.csv");
-
     hpx::apply(this->executor_low, TreeConstructor::sendSweepCount_action(), this->get_id());
 }
 
@@ -785,8 +783,6 @@ bool TreeConstructor::terminateSweep(uint64_t v, Value s, std::vector<hpx::id_ty
         arc->body->boundary.remove(s);
         this->assignSaddle(arc, s, peers);
 
-        graph.taskStop("terminate"+std::to_string(v), "terminate");
-
         // check if we can continue sweep at this saddle
         if (this->checkSaddle(arc->saddle)) {
             if (!done.occurred()){
@@ -905,7 +901,6 @@ void TreeConstructor::startSweep(uint64_t v, bool leaf)
     if (done.occurred()){
         hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
         hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
-        graph.taskStop("start"+std::to_string(v), "startsweep");
         return;
     }
 
