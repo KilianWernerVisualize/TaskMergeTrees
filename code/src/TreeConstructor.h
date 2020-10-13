@@ -67,9 +67,6 @@ public:
     uint64_t construct();
     HPX_DEFINE_COMPONENT_ACTION(TreeConstructor, construct);
 
-    void scanMinima();
-    HPX_DEFINE_COMPONENT_ACTION(TreeConstructor, scanMinima);
-
     void destroy();
     HPX_DEFINE_COMPONENT_ACTION(TreeConstructor, destroy);
 
@@ -180,7 +177,6 @@ private:
 
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::init_action, treeConstructor_init_action);
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::construct_action, treeConstructor_construct_action);
-HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::scanMinima_action, treeConstructor_scanMinima_action);
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::destroy_action, treeConstructor_destroy_action);
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::startSweep_action, treeConstructor_startSweep_action);
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::continueLocalSweep_action, treeConstructor_continueLocalSweep_action);

@@ -21,7 +21,6 @@ typedef hpx::components::simple_component<TreeConstructor> TreeConstructorCompon
 HPX_REGISTER_COMPONENT(TreeConstructorComponent, TreeConstructor);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::init_action, treeConstructor_init_action);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::construct_action, treeConstructor_construct_action);
-HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::scanMinima_action, treeConstructor_scanMinima_action);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::destroy_action, treeConstructor_destroy_action);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::startSweep_action, treeConstructor_startSweep_action);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::continueLocalSweep_action, treeConstructor_continueLocalSweep_action);
