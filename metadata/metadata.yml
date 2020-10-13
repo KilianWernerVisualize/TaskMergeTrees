@@ -1,3 +1,8 @@
 metadata_version: 1
 name: Task Based Merge Trees
+description: Task-based distributed merge tree construction algorithm.
+authors:
+- name: Kilian Werner
+  affiliations:
+  - name: Technische Universität Kaiserslautern
 corresponding_contributor: {}
