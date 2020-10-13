@@ -175,8 +175,6 @@ private:
 
     std::vector<Value> danglingArcs;
 
-    TaskGraph graph;
-
     hpx::lcos::local::mutex mapLock;
 };
 
