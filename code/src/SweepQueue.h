@@ -50,7 +50,6 @@ public:
         for (uint32_t i = 0; i < n; ++i) {
             if (neighbors[i] != INVALID_VERTEX) {
                 if (swept->operator [](neighbors[i]) == INVALID_VERTEX) {
-                    //this->queue.push(neighbors[i]);
                     this->queue.push_front(neighbors[i]);
                 }
             }
@@ -78,8 +77,6 @@ private:
     mutable hpx::lcos::local::mutex lock;
 
     DistVec<uint64_t>* swept;
-    //boost::heap::fibonacci_heap<uint64_t, boost::heap::compare<DataComparator>, boost::heap::constant_time_size<false>> queue;
-    //std::stack<uint64_t> queue;
     std::deque<uint64_t> queue;
 
     uint64_t id;

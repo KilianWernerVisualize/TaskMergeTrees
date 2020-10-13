@@ -56,13 +56,7 @@ public:
         localVertices.reserve(this->blockSize.x * this->blockSize.y * this->blockSize.z);
 
         for (uint64_t v = 0; v < this->getNumVerticesLocal(true); ++v) {
-            //if (!(this->blockMask[v] & 0x80)) // only non-ghost vertices
                 localVertices.push_back(v | this->blockIndex);
-
-            //            // Test: only vertices with full neighborhood
-            //            const uint8_t mask = this->blockMask[v & VERTEX_INDEX_MASK];
-            //            if ((mask & 0x20) && (mask & 0x10) && (mask & 0x8) && (mask & 0x4) && (mask & 0x2) && (mask & 0x1))
-            //                localVertices.push_back(v | this->blockIndex);
         }
 
         return localVertices;
@@ -190,10 +184,8 @@ public:
 
     glm::uvec3 getGlobalCoords(uint64_t v) const
     {
-        //assert((v & BLOCK_INDEX_MASK) == INVALID_BLOCK);
         v = v & VERTEX_INDEX_MASK;
 
-        glm::uvec3 const& size = this->blockSizeWithGhost;
         glm::uvec3 const& gridSize = this->gridSize;
 
         glm::uvec3 globalCoords;
@@ -210,11 +202,9 @@ public:
 
     glm::uvec3 getLocalCoords(uint64_t v) const
     {
-        //assert((v & BLOCK_INDEX_MASK) == this->blockIndex);
         v = v & VERTEX_INDEX_MASK;
 
         glm::uvec3 const& size = this->blockSizeWithGhost;
-        glm::uvec3 const& gridSize = this->gridSize;
 
         glm::uvec3 localCoords;
         localCoords.x = v % size.x;
@@ -258,7 +248,6 @@ public:
         glm::uvec3 globalCoords = getGlobalCoords(v);
 
         glm::uvec3 const& size = this->blockSizeWithGhost;
-        glm::uvec3 const& gridSize = this->gridSize;
 
         v = globalCoords.x + globalCoords.y * size.x + globalCoords.z * size.x * size.y - this->blockCoordGlobalOrigin;
 
@@ -410,11 +399,6 @@ protected:
         this->blockIndex = static_cast<uint64_t>(blockIndex) << BLOCK_INDEX_SHIFT;
 
 
-        for (int i = 0; i < this->getNumVertices(); i++){
-            //Log() << this->blockIndex3D << "::" << i << ": " << this->getValue(i).value << " ";
-        }
-
-
         // Print info
         if (blockIndex == 0) {
             Log() << "Grid size: (" << this->gridSize.x << ", " << this->gridSize.y << ", " << this->gridSize.z << ")";
@@ -460,59 +444,6 @@ private:
     std::vector<uint8_t> blockMask; // msb to lsb: [ghost cell, unused, -x, +x, -y, +y, -z, +z]
 };
 
-/**
- * @brief Implementation for nrrd grids.
- */
-/*
-class NrrdManager : public RegularGridManager {
-public:
-    NrrdManager(const std::string& path)
-    {
-        this->nrrd = nrrdNew();
-        if (nrrdLoad(this->nrrd, path.c_str(), 0)) {
-            LogError() << "Failed to read nrrd file: " << path;
-            nrrdNuke(this->nrrd);
-            return;
-        }
-
-        if (this->nrrd->type != nrrdTypeFloat) {
-            Nrrd* tmp = nrrdNew();
-            nrrdConvert(tmp, this->nrrd, nrrdTypeFloat);
-            nrrdNuke(this->nrrd);
-            this->nrrd = tmp;
-        }
-    }
-
-    virtual ~NrrdManager() = default;
-
-    glm::uvec3 getSize()
-    {
-        size_t size[4];
-        nrrdAxisInfoGet_va(this->nrrd, nrrdAxisInfoSize, &size[0], &size[1], &size[2], &size[3]);
-
-        return glm::uvec3(size[0], size[1], size[2]);
-    }
-
-    void readBlock(const glm::uvec3& offset, const glm::uvec3& size, float* blockOut)
-    {
-        const float* data = static_cast<float*>(this->nrrd->data);
-        const glm::uvec3 dataSize = this->getSize();
-
-        for (uint32_t z = 0; z < size.z; ++z)
-            for (uint32_t y = 0; y < size.y; ++y)
-                memcpy(blockOut + z * size.y * size.x + y * size.x, data + (offset.z + z) * dataSize.y * dataSize.x + (offset.y + y) * dataSize.x + offset.x, size.x * sizeof(float));
-    }
-
-    void release()
-    {
-        if (this->nrrd)
-            nrrdNuke(this->nrrd);
-    }
-
-private:
-    Nrrd* nrrd = nullptr;
-};
-*/
 /**
  * @brief Implementation for VTK's vti grids.
  */
@@ -577,9 +508,6 @@ DataManager* DataManager::load(const std::string& path, uint32_t blockIndex, uin
 {
     DataManager* data = nullptr;
 
-    //if (boost::algorithm::ends_with(path, ".nrrd"))
-        //data = new NrrdManager(path);
-    /*else */
     if (boost::algorithm::ends_with(path, ".vti"))
         data = new VTIManager(path);
 

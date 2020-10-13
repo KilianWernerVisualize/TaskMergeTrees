@@ -5,6 +5,7 @@
 #include "DataManager.h"
 #include <hpx/hpx.hpp>
 
+//Stores data associated with vertices, local vertices in array, remote vertices in map
 template <typename T>
 class DistVec {
 

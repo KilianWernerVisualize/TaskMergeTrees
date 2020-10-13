@@ -24,15 +24,13 @@ class TreeConstructor;
 #include <vtkImageData.h>
 #endif
 
-#ifdef FILEOUT
-typedef uint64_t timestamp;
-
-struct fileEntry {
-    char type; //true if arc, false if vertex
-    timestamp time;
-    uint64_t id1;
-    uint64_t id2;
-};
+#ifdef VTPOUT
+#include <vtkPoints.h>
+#include <vtkLine.h>
+#include <vtkCellArray.h>
+#include <vtkSmartPointer.h>
+#include <vtkXMLPolyDataWriter.h>
+#include <vtkPolyData.h>
 #endif
 
 class Options {
@@ -114,11 +112,6 @@ public:
     void startTrunk(Value v);
     HPX_DEFINE_COMPONENT_ACTION(TreeConstructor, startTrunk);
 
-#ifdef FILEOUT
-    uint64_t convertToGlobal(uint64_t v);
-    HPX_DEFINE_COMPONENT_ACTION(TreeConstructor, convertToGlobal);
-#endif
-
 private:
     void countSweepsLocal(int64_t diff);
 
@@ -170,26 +163,21 @@ private:
     hpx::threads::executors::pool_executor executor_sweeps;
     hpx::threads::executors::pool_executor executor_high;
 
-#ifdef FILEOUT
-    std::vector<fileEntry> arcFileEntries;
-    hpx::lcos::local::mutex arcFileLock;
-    hpx::util::high_resolution_timer clock;
-#endif
     Value trunkStart;
 
     // Map for each vertex to ID of arc extremum
-    DistVec<uint64_t> swept; // who has been swept by which saddle/local minimum (inverse un-fixed augmentation)
+    DistVec<uint64_t> swept; // what vertex has been swept by which saddle/local minimum
 
     // Union-find-structure containing child-parent relations
-    DistVec<uint64_t> UF; // TODO distributed:  dynamic
+    DistVec<uint64_t> UF;
 
-    DistVec<Arc*> arcMap; // (map: minima/saddle where started -> arc)
+    DistVec<Arc*> arcMap; // (map: starting minima/saddle -> arc)
 
     std::vector<Value> danglingArcs;
 
     TaskGraph graph;
 
-    hpx::lcos::local::mutex mapLock; // locally: replace by vector<mutex> -> mutex for each arc (don't have to lock complete "map" because vector)
+    hpx::lcos::local::mutex mapLock;
 };
 
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::init_action, treeConstructor_init_action);
@@ -209,6 +197,3 @@ HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::registerArc_action, treeConstru
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::postProc_action, treeConstructor_postProc_action);
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::stitch_action, treeConstructor_stitch_action);
 HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::startTrunk_action, treeConstructor_startTrunk_action);
-#ifdef FILEOUT
-HPX_REGISTER_ACTION_DECLARATION(TreeConstructor::convertToGlobal_action, treeConstructor_convertToGlobal_action);
-#endif

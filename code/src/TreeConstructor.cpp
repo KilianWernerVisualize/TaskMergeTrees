@@ -14,12 +14,6 @@
 #include <hpx/include/parallel_sort.hpp>
 #include <unistd.h>
 
-#ifdef FILEOUT
-#include <fstream>
-#include <iostream>
-#include <string>
-#endif
-
 HPX_REGISTER_COMPONENT_MODULE();
 
 typedef hpx::components::simple_component<TreeConstructor> TreeConstructorComponent;
@@ -42,20 +36,8 @@ HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::registerArc_action, 
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::postProc_action, treeConstructor_postProc_action);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::stitch_action, treeConstructor_stitch_action);
 HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::startTrunk_action, treeConstructor_startTrunk_action);
-#ifdef FILEOUT
-HPX_REGISTER_ACTION(TreeConstructorComponent::wrapped_type::convertToGlobal_action, treeConstructor_convertToGlobal_action);
 
-uint64_t TreeConstructor::convertToGlobal(uint64_t v){
-    return this->dataManager->convertToGlobal(v);
-}
 
-#endif
-
-/**
- * @brief Initialize data.
- * @param treeConstructors
- * @param input
- */
 void TreeConstructor::init(const std::vector<hpx::id_type>& treeConstructors, const std::string& input, const Options& options)
 {
     // Store list of tree constructor components and determine index of this component
@@ -76,7 +58,7 @@ void TreeConstructor::init(const std::vector<hpx::id_type>& treeConstructors, co
     this->sweeps.store(0l);
     this->numMinima = 0l;
 
-    numVertices = this->dataManager->getNumVerticesLocal(true); // TODO
+    numVertices = this->dataManager->getNumVerticesLocal(true);
 
     this->swept.init(numVertices, INVALID_VERTEX, this->dataManager);
     this->UF.init(numVertices, INVALID_VERTEX, this->dataManager);
@@ -94,44 +76,12 @@ void TreeConstructor::init(const std::vector<hpx::id_type>& treeConstructors, co
 
     graph.init("graph.csv");
 
-
-#ifdef FILEOUT
-    this->clock.restart();
-#endif
-
     hpx::apply(this->executor_low, TreeConstructor::sendSweepCount_action(), this->get_id());
 }
 
-/**
- * @brief Shutdown.
- */
 void TreeConstructor::destroy()
 {
     if (this->dataManager){
-#ifdef FILEOUT
-        std::streampos size;
-
-        std::ofstream file ("output_"+ std::to_string(this->index) +".bin", std::ios::out|std::ios::binary);
-
-        if (file.is_open()){
-
-            if (this->index == 0){
-                uint64_t x = (uint64_t)this->dataManager->getDimensions().x;
-                uint64_t y = (uint64_t)this->dataManager->getDimensions().y;
-                LogInfo().tag(std::to_string(this->index)) << "max_x : " << x << " max_y: " << y;
-                file.write((char*)&x, sizeof(uint64_t));
-                file.write((char*)&y, sizeof(uint64_t));
-            }
-
-            for (fileEntry entry : this->arcFileEntries){
-                file.write((char*)&entry.type, sizeof(char));
-                file.write((char*)&entry.time, sizeof(timestamp));
-                file.write((char*)&entry.id1, sizeof(std::uint64_t));
-                file.write((char*)&entry.id2, sizeof(std::uint64_t));
-            }
-            file.close();
-        }
-#endif
 #ifdef VTIOUT
         vtkSmartPointer<vtkImageData> imageData =
                 vtkSmartPointer<vtkImageData>::New();
@@ -142,22 +92,16 @@ void TreeConstructor::destroy()
 #else
         imageData->AllocateScalars(VTK_UNSIGNED_LONG, 1);
 #endif
-        int* dims = imageData->GetDimensions();
-
         uint64_t* data = static_cast<uint64_t*>(imageData->GetScalarPointer());
 
         int j = 0;
 
-        for (int i = 0; (i < this->dataManager->getNumVerticesLocal(true)); i++){
+        for (uint64_t i = 0; (i < this->dataManager->getNumVerticesLocal(true)); i++){
 
             uint64_t v = this->dataManager->getLocalVertex(i);
             if (this->dataManager->isGhost(v))
                 continue;
-            /*
-            uint64_t host = swept[localVertices[i]] >> BLOCK_INDEX_SHIFT;
-            if (host < this->treeConstructors.size())
-                data[i] = hpx::async<TreeConstructor::convertToGlobal_action>(this->treeConstructors[host], swept[localVertices[i]]).get() & VERTEX_INDEX_MASK;
-                */
+
             if (this->dataManager->isLocal(swept[v])){
                 data[j] = this->dataManager->getValue(swept[v]).value;
             }
@@ -207,41 +151,18 @@ void TreeConstructor::stitch(std::vector<Value> danglings){
     Arc* trunkStart;
     fetchCreateArc(trunkStart, danglings[0].vertex);
 
-    //trunkStart->body->augmentation.inherit(trunkStart->inheritedAugmentations);
 
     if (danglings.size() > 1){
-        for (int i = 0; (i < danglings.size() - 2); i++){
+        for (uint64_t i = 0; (i < danglings.size() - 2); i++){
             if (this->dataManager->isLocal(danglings[i].vertex)){
                 Arc* newArc;
                 fetchCreateArc(newArc, danglings[i].vertex);
                 newArc->saddle = danglings[i+1].vertex;
-#ifdef FILEOUT
-                fileEntry entry;
-                entry.id1 = (hpx::async<TreeConstructor::convertToGlobal_action>(this->treeConstructors[newArc->extremum >> BLOCK_INDEX_SHIFT], newArc->extremum).get()) & VERTEX_INDEX_MASK;
-                entry.id2 = (hpx::async<TreeConstructor::convertToGlobal_action>(this->treeConstructors[newArc->saddle >> BLOCK_INDEX_SHIFT], newArc->saddle).get()) & VERTEX_INDEX_MASK;
-                entry.time = this->clock.elapsed_microseconds();
-                entry.type = 2;
-                this->arcFileLock.lock();
-                this->arcFileEntries.push_back(entry);
-                this->arcFileLock.unlock();
-#endif
             }
-            //if (this->arcMap.contains(danglings[i].vertex)){
-            //    Arc* arc = arcMap[danglings[i].vertex];
 #ifndef FLATAUGMENTATION
                 for (auto iter = arc->body->augmentation.vertices.begin(); (iter != arc->body->augmentation.vertices.end()); iter.operator ++()){
                     swept[(*iter)->key.vertex] = INVALID_VERTEX;
-#else
-//                for (Value c : arc->body->augmentation.vertices){
-//                    swept[c.vertex] = INVALID_VERTEX;
 #endif
-                    /*
-                    LogDebug().tag(std::to_string(this->index)) << "Dangling vertex "
-                                                                << ( (*iter)->key.vertex  >> BLOCK_INDEX_SHIFT) << "::" << ((*iter)->key.vertex  & VERTEX_INDEX_MASK) << " from dangling arc "
-                                                                << ( arc->extremum  >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum  & VERTEX_INDEX_MASK);*/
-                //}
-  //              arc->body->augmentation.clear();
-            //}
         }
     }
 
@@ -257,8 +178,7 @@ void TreeConstructor::stitch(std::vector<Value> danglings){
 
         if (swept[v] == INVALID_VERTEX){
             if (this->dataManager->getValue(v) < danglings[0]){
-                swept[v] = INVALID_VERTEX; //To-Do Trunkstart!
-
+                swept[v] = INVALID_VERTEX;
             } else if (this->dataManager->getValue(v) > danglings[danglings.size()-1]){
                 swept[v] = danglings[danglings.size()-1].vertex;
                 Arc* arc;
@@ -308,7 +228,7 @@ void TreeConstructor::stitch(std::vector<Value> danglings){
             }
         }
     });
-            LogInfo().tag(std::to_string(this->index)) << "Stitch: " << timer.elapsed() << " s";
+    LogInfo().tag(std::to_string(this->index)) << "Stitch: " << timer.elapsed() << " s";
 #ifdef VTIOUT
 #ifndef FLATAUGMENTATION
     for (Arc* arc : this->arcMap.local){
@@ -346,6 +266,64 @@ void TreeConstructor::stitch(std::vector<Value> danglings){
     }
 #endif
 #endif
+
+#ifdef VTPOUT
+        if (this->index == 0ul){
+            vtkSmartPointer<vtkPoints> pointData =
+                    vtkSmartPointer<vtkPoints>::New();
+
+            vtkSmartPointer<vtkCellArray> cellData =
+                    vtkSmartPointer<vtkCellArray>::New();
+
+            int pointcount = 0;
+
+            for (Arc* arc : this->arcMap.local){
+                if (arc != nullptr && arc->saddle != INVALID_VERTEX){
+                    glm::uvec3 coords = this->dataManager->getGlobalCoords(arc->extremum);
+                    pointData->InsertNextPoint(coords.x, coords.y, coords.z);
+                    glm::uvec3 coords2 = this->dataManager->getGlobalCoords(arc->saddle);
+                    pointData->InsertNextPoint(coords2.x, coords2.y, coords2.z);
+                    vtkSmartPointer<vtkLine> currentArc =
+                            vtkSmartPointer<vtkLine>::New();
+                    currentArc->GetPointIds()->SetId(0, pointcount++);
+                    currentArc->GetPointIds()->SetId(1, pointcount++);
+                    cellData->InsertNextCell(currentArc);
+                }
+            }
+
+            for (auto entry : this->arcMap.remote){
+                if (entry.second != nullptr){
+                    Arc* arc = entry.second;
+                    glm::uvec3 coords = this->dataManager->getGlobalCoords(this->dataManager->convertToGlobal(arc->extremum));
+                    pointData->InsertNextPoint(coords.x, coords.y, coords.z);
+                    coords = this->dataManager->getGlobalCoords(this->dataManager->convertToGlobal(arc->saddle));
+                    pointData->InsertNextPoint(coords.x, coords.y, coords.z);
+                    vtkSmartPointer<vtkLine> currentArc =
+                            vtkSmartPointer<vtkLine>::New();
+                    currentArc->GetPointIds()->SetId(0, pointcount++);
+                    currentArc->GetPointIds()->SetId(1, pointcount++);
+                    cellData->InsertNextCell(currentArc);
+                }
+            }
+
+
+            vtkSmartPointer<vtkPolyData> arcData =
+                    vtkSmartPointer<vtkPolyData>::New();
+            arcData->SetPoints(pointData);
+            arcData->SetLines(cellData);
+
+            vtkSmartPointer<vtkXMLPolyDataWriter> arcwriter =
+              vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+            std::string filename = "output.vtp";
+            arcwriter->SetFileName(filename.c_str());
+          #if VTK_MAJOR_VERSION <= 5
+            writer->SetInput(unstructuredGrid);
+          #else
+            arcwriter->SetInputData(arcData);
+          #endif
+            arcwriter->Write();
+        }
+#endif
     postProcessing.set();
 }
 
@@ -369,14 +347,11 @@ void TreeConstructor::countSweepsLocal(int64_t diff){
     if (currentcount % 100000 == 0 || (currentcount < 1000 && currentcount > -1000) || (currentcount < -19700000)){
         LogDebug().tag(std::to_string(this->index))<< "Current Count: " << currentcount;
     }
-
-    //LogDebug().tag(std::to_string(this->index)) << "Counting sweeps locally " << sweepsLocal[hpx::get_worker_thread_num()] << "@" << hpx::get_worker_thread_num();
 }
 
 void TreeConstructor::countSweeps(std::int64_t diff){
-    //this->countLock.lock();
     if (diff == std::numeric_limits<std::int64_t>::max()){
-        if (std::atomic_fetch_add(&this->remoteLeavesDone, 1) == (this->treeConstructors.size()-1)){
+        if (std::atomic_fetch_add(&this->remoteLeavesDone, 1) == (int)(this->treeConstructors.size()-1)){
             LogDebug().tag(std::to_string(this->index)) << "LeavesDone!";
             this->leavesDone.set();
         }
@@ -390,7 +365,7 @@ void TreeConstructor::countSweeps(std::int64_t diff){
 
     LogDebug().tag(std::to_string(this->index)) << "Increasing Counter " << old << " by " << diff;
     if (diff > 0l){
-        if (std::atomic_fetch_add(&this->remoteLeavesDone, 1) == (this->treeConstructors.size()-1)){
+        if (std::atomic_fetch_add(&this->remoteLeavesDone, 1) == (int)(this->treeConstructors.size()-1)){
             LogDebug().tag(std::to_string(this->index)) << "LeavesDone!";
             this->leavesDone.set();
         }
@@ -407,8 +382,6 @@ void TreeConstructor::countSweeps(std::int64_t diff){
             hpx::apply(this->executor_high, TreeConstructor::finish_action(), peer);
         }
     }
-
-    //this->countLock.unlock();
 }
 
 void TreeConstructor::registerArc(std::vector<Value> extrema){
@@ -423,59 +396,8 @@ void TreeConstructor::startTrunk(Value v){
     this->trunkStarted.set();
 }
 
-void TreeConstructor::scanMinima(){
-    for (uint64_t i = 0; (i < 1000 && scanCount < this->dataManager->getNumVerticesLocal(true)); ++i) {
-        uint64_t v = this->dataManager->getLocalVertex(scanCount);
-        if (this->dataManager->isMinimum(v)) {
-
-            uint64_t neighbors[6];
-            uint32_t numNeighbors = this->dataManager->getNeighbors(v, neighbors);
-
-            assert(v != INVALID_VERTEX);
-            if (!this->dataManager->isGhost(v)){
-                hpx::apply(TreeConstructor::startSweep_action(), this->get_id(), v, true);
-                ++numMinima;
-                if (numMinima % 5000 == 0){
-                    LogInfo().tag(std::to_string(this->index))<< "Scheduled Sweeps: " << numMinima;
-                }
-            }
-        }
-        scanCount++;
-    }
-
-    if (scanCount < this->dataManager->getNumVerticesLocal(true)){
-        hpx::apply(this->executor_low, TreeConstructor::scanMinima_action(), this->treeConstructors[0]);
-        return;
-    }
-
-    LogInfo().tag(std::to_string(this->index))<< "ALL SWEEPS SCHEDULED!: " << numMinima;
-
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Minima (local): " << numMinima;
-#endif
-    if (numMinima == 0l)
-        numMinima = std::numeric_limits<std::int64_t>::max();
-
-    if (!options.trunkskip){
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Sending " << numMinima << " leaves!";
-#endif
-        hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], std::numeric_limits<std::int64_t>::max());
-    } else {
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Sending " << numMinima << " leaves!";
-#endif
-        hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], numMinima);
-    }
-}
-
-
-/**
- * @brief Construction main entry point.
- */
 uint64_t TreeConstructor::construct()
 {
-    graph.taskStart("construct", "construct", "construct", "construct");
     Profiler profiler(__func__);
     hpx::util::high_resolution_timer timer;
 
@@ -484,40 +406,24 @@ uint64_t TreeConstructor::construct()
 
     for (uint64_t v : localVertices) {
         if (this->dataManager->isMinimum(v)) {
-
-            uint64_t neighbors[6];
-            uint32_t numNeighbors = this->dataManager->getNeighbors(v, neighbors);
-
-            assert(v != INVALID_VERTEX);
             if (!this->dataManager->isGhost(v)){
-                graph.taskStart("construct", "construct", "start"+std::to_string(v), "startsweep");
                 hpx::apply(this->executor_start_sweeps, TreeConstructor::startSweep_action(), this->get_id(), v, true);
                 ++numMinima;
             }
         }
     }
 
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Minima (local): " << numMinima;
-#endif
     if (numMinima == 0l)
         numMinima = std::numeric_limits<std::int64_t>::max();
 
     if (!options.trunkskip){
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Sending " << numMinima << " leaves!";
-#endif
         hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], std::numeric_limits<std::int64_t>::max());
     } else {
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Sending " << numMinima << " leaves!";
-#endif
         hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], numMinima);
     }
 
     this->termination.wait();
 
-    graph.taskStop("construct", "construct");
     if (this->index == 0){
         this->postProc();
         this->postProcessing.wait();
@@ -526,7 +432,7 @@ uint64_t TreeConstructor::construct()
         int numArcss[hpx::get_num_worker_threads()];
         std::vector<std::vector<Value>> danglingArcss;
         danglingArcss.resize(hpx::get_num_worker_threads());
-        for (int i = 0; (i < hpx::get_num_worker_threads()); i++){
+        for (uint64_t i = 0; (i < hpx::get_num_worker_threads()); i++){
             numArcss[i] = 0;
         }
 
@@ -547,7 +453,7 @@ uint64_t TreeConstructor::construct()
         this->trunkStarted.wait();
         danglingArcs.push_back(this->trunkStart);
 
-        for (int i = 0; (i < hpx::get_num_worker_threads()); i++){
+        for (uint64_t i = 0; (i < hpx::get_num_worker_threads()); i++){
             numArcs += numArcss[i];
             danglingArcs.insert(danglingArcs.end(), danglingArcss[i].begin(), danglingArcss[i].end());
         }
@@ -557,10 +463,7 @@ uint64_t TreeConstructor::construct()
                                 return a1 < a2;
                             });
 
-        if (this->danglingArcs[0] != trunkStart)
-            LogError().tag(std::to_string(this->index)) << "WTF";
-
-        for (int i = 1; (i < this->treeConstructors.size()); i++){
+        for (uint64_t i = 1ul; (i < this->treeConstructors.size()); i++){
             hpx::apply<TreeConstructor::stitch_action>(this->treeConstructors[i], danglingArcs);
         }
 
@@ -577,7 +480,7 @@ uint64_t TreeConstructor::construct()
         danglingArcs.resize(hpx::get_num_worker_threads());
         int numArcs = 0;
         int numArcss[hpx::get_num_worker_threads()];
-        for (int i = 0; (i < hpx::get_num_worker_threads()); i++){
+        for (uint64_t i = 0; (i < hpx::get_num_worker_threads()); i++){
             numArcss[i] = 0;
         }
 
@@ -597,7 +500,7 @@ uint64_t TreeConstructor::construct()
 
         std::vector<hpx::future<void>> registered;
 
-        for (int i = 0; (i < hpx::get_num_worker_threads()); i++){
+        for (uint64_t i = 0; (i < hpx::get_num_worker_threads()); i++){
             numArcs += numArcss[i];
             registered.push_back(hpx::async(this->executor_high, TreeConstructor::registerArc_action(), this->treeConstructors[0], danglingArcs[i]));
         }
@@ -605,180 +508,55 @@ uint64_t TreeConstructor::construct()
         hpx::wait_all(registered);
 
         LogInfo().tag(std::to_string(this->index))<< "Arcs: " << numArcs;
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Sending " << registered.size() << " danglings!";
-#endif
+
         hpx::async<TreeConstructor::postProc_action>(this->treeConstructors[0]);
 
         this->postProcessing.wait();
 
         return numArcs;
     }
-    /*
-     * TODO:
-     * Send all Arc Information to Node0 (or do this on Arc completion)
-     */
-
-    /*
-    std::vector<Arc*> arcList;
-        for (Arc* arc : arcMap)
-            if (arc != nullptr && arc->saddle == INVALID_VERTEX)
-                arcList.push_back(arc);
-
-        std::sort(arcList.begin(), arcList.end(),
-            [&](const Arc* a1, const Arc* a2) {
-                return this->dataManager->getValue(a1->extremum) < this->dataManager->getValue(a2->extremum);
-            });
-
-    #pragma omp parallel for
-        for (uint64_t i = 0; i < arcList.size() - 1; ++i)
-            arcList[i]->saddle = arcList[i + 1]->extremum;
-
-        for (uint64_t v : localVertices){
-            swept[v & VERTEX_INDEX_MASK] = INVALID_VERTEX;
-        }
-
-    #pragma omp parallel for
-        for (uint64_t i = 0; (i < localVertices.size()); i++){
-            if (arcMap[i]){
-                Arc* arc = arcMap[i];
-                for (auto iter = arc->body->augmentation.vertices.begin(); (iter != arc->body->augmentation.vertices.end()); iter.operator ++()){
-                    if (swept[(*iter)->key.vertex  & VERTEX_INDEX_MASK] != INVALID_VERTEX){
-                        if (arcMap[swept[(*iter)->key.vertex  & VERTEX_INDEX_MASK] & VERTEX_INDEX_MASK]->extremum < arc->extremum)
-                            swept[(*iter)->key.vertex  & VERTEX_INDEX_MASK] = arc->extremum;
-                    } else {
-                        swept[(*iter)->key.vertex  & VERTEX_INDEX_MASK] = arc->extremum;
-                    }
-                }
-            }
-        }
-
-        hpx::parallel::for_each(
-            hpx::parallel::execution::parallel_unsequenced_policy(),
-            boost::irange(0, (int)localVertices.size()).begin(), boost::irange(0, (int)localVertices.size()).end(),
-            [&](std::size_t i)
-            {
-                if (swept[i] == INVALID_VERTEX){
-                    if (this->dataManager->getValue(i) < this->dataManager->getValue(arcList[0]->extremum)){
-                       swept[i] = trunkStart->extremum;
-                    } else if (this->dataManager->getValue(i) > this->dataManager->getValue(arcList[arcList.size()-1]->extremum)){
-                        swept[i] = arcList[arcList.size()-1]->extremum;
-                    } else {
-                        int64_t min = 0;
-                        int64_t max = arcList.size()-1;
-                        while (true){
-                            int64_t j = (max+min)/2;
-                            if (this->dataManager->getValue(i) > this->dataManager->getValue(arcList[j]->extremum)){
-                                if (this->dataManager->getValue(i) < this->dataManager->getValue(arcList[j+1]->extremum)){
-                                    swept[i] = arcList[j]->extremum;
-                                    break;
-                                } else {
-                                    min = j+1;
-                                    if (min > max){
-                                        swept[i] = arcList[min]->extremum;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                max = j-1;
-                                if (min > max){
-                                    swept[i] = arcList[min]->extremum;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        );
-*/
-
-    //Log().tag(std::to_string(this->index)) << "Local Arcs Constructed: " << timer.elapsed() << " s";
-    /*
-    for (int i = 0; (i < localVertices.size()); i++){
-        Arc* arc = arcMap[i];
-        if (arc)
-            Log()
-    }
-
-    for (int i = 0; (i < localVertices.size()); i++){
-        Log().tag(std::to_string(this->index)) << "Index " << i << " valued " << this->dataManager->getValue(i).value << " swept by " << (swept[i] & VERTEX_INDEX_MASK);
-    }*/
 }
 
 void TreeConstructor::sweepLoop(Arc* arc){
-    //Profiler profiler(__func__);
     SweepQueue& queue = arc->body->queue;
     Boundary& boundary = arc->body->boundary;
     uint64_t& v = arc->extremum;
 
     while (!queue.empty()) {
-    //for (int j = 0; (j < 100); j++){
         uint64_t c = queue.pop();
-
-        //Log().tag(std::to_string(this->index)) << " cont touching " << (c & VERTEX_INDEX_MASK);
-
-        if (c == INVALID_VERTEX) // empty (queue skips elements which have been swept in the mean time)  -> could move skip check to empty()
+        if (c == INVALID_VERTEX)
             break;
 
         const Value value = this->dataManager->getValue(c);
 
         if (this->dataManager->isGhost(c)){
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << "ContinueSweep removing from Boundary of: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                        << " the vertex: " << (c >> BLOCK_INDEX_SHIFT) << "::" << (c& VERTEX_INDEX_MASK);
-//#endif
+
             boundary.remove(value); // remove from boundary
 
-            //mark as swept
-            swept[c] = v;
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << "Augmenting: " << (c >> BLOCK_INDEX_SHIFT) << "::" << (c & VERTEX_INDEX_MASK)
-//                                                        << " to: " << (v>> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK);
-//#endif
+            swept[c] = v;           //mark as swept
+
 
             uint64_t neighbors[6];
             uint32_t numNeighbors = this->dataManager->getNeighbors(c, neighbors);
 
-            for (int i = 0; (i < numNeighbors); i++){
+            for (uint64_t i = 0; (i < numNeighbors); i++){
                 if ((!this->dataManager->isGhost(neighbors[i])) && (this->swept[neighbors[i]] == INVALID_VERTEX)){
                     queue.push(neighbors[i]);
                 }
             }
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << " sweeping ghost " << (c >> BLOCK_INDEX_SHIFT) << "::" << (c & VERTEX_INDEX_MASK) << " from min: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK);
-//#endif
             continue;
         }
-//#ifdef ENABLE_DEBUG_LOGGING
-//        LogDebug().tag(std::to_string(this->index)) << "Sweep from " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                   << " touches " <<  (c >> BLOCK_INDEX_SHIFT) << "::" << (c & VERTEX_INDEX_MASK);
-//#endif
+
         // check if can be swept
         if (this->touch(c, v)) {
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << "Sweep from " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                       << " sweeps " <<  (c >> BLOCK_INDEX_SHIFT) << "::" << (c & VERTEX_INDEX_MASK);
-//#endif
-            //Log().tag(std::to_string(this->index)) << " cont sweeping " << (c & VERTEX_INDEX_MASK);
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << "SweepLoop removing from Boundary of: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                                    << " the vertex: " << (value.vertex >> BLOCK_INDEX_SHIFT) << "::" << (value.vertex& VERTEX_INDEX_MASK);
-//#endif
             boundary.remove(value); // remove from boundary
-
-            // put into our augmentation and mark as swept
-            this->swept[c] = v;
+            this->swept[c] = v;     // put into our augmentation and mark as swept
             arc->body->augmentation.sweep(value);
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << "Augmenting: " << (c >> BLOCK_INDEX_SHIFT) << "::" << (c & VERTEX_INDEX_MASK)
-//                                                                        << " to: " << (v>> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK);
-//#endif
 
             uint64_t neighbors[6];
             uint32_t numNeighbors = this->dataManager->getNeighbors(c, neighbors);
 
-            for (int i = 0; (i < numNeighbors); i++){
+            for (uint64_t i = 0; (i < numNeighbors); i++){
                 if (this->dataManager->isGhost(neighbors[i]) && (this->swept[neighbors[i]] == INVALID_VERTEX)){
                     arc->body->remoteCallLock.lock();
 #ifdef LAZYREMOTECALLS
@@ -792,11 +570,6 @@ void TreeConstructor::sweepLoop(Arc* arc){
                 }
             }
         } else {
-            // not allowed to sweep yet -> add as potential boundary candidate
-//#ifdef ENABLE_DEBUG_LOGGING
-//            LogDebug().tag(std::to_string(this->index)) << "Adding to Boundary of: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                        << " the vertex: " << (value.vertex >> BLOCK_INDEX_SHIFT) << "::" << (value.vertex& VERTEX_INDEX_MASK);
-//#endif
             boundary.add(value);
         }
     }
@@ -806,9 +579,7 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
 {
     uint64_t sent = dataManager->convertToLocal(c);
     uint64_t swept_from = dataManager->convertToLocal(from);
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "receiving " << (c & VERTEX_INDEX_MASK) << " @global: " << this->dataManager->getGlobalCoords(c) << " taking as: " << (sent & VERTEX_INDEX_MASK) << " @local: " << this->dataManager->getLocalCoords(sent);
-#endif
+
     bool leaveItToContinuePeer = false;
 
     //Fetch Arc
@@ -816,15 +587,9 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
     this->mapLock.lock();
     if (fetchCreateArc(arc, v)){
         this->mapLock.unlock();
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << " cont anew " << (v >> BLOCK_INDEX_SHIFT) << (v & VERTEX_INDEX_MASK);
-#endif
     } else {
         this->mapLock.unlock();
         arc->body->lock.lock();
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << " cont not anew " << (v >> BLOCK_INDEX_SHIFT) << (v & VERTEX_INDEX_MASK) << " state " << arc->body->state;
-#endif
         if (arc->body->state == 0) {
             leaveItToContinuePeer = true;
         } else {
@@ -840,9 +605,6 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
 
     if (leaveItToContinuePeer){
         arc->body->queue.push(sent);
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << " injecting for future continueSweepPeer " << (sent & VERTEX_INDEX_MASK);
-#endif
         arc->body->lock.unlock();
         RemoteAnswer answer(this->get_id());
         std::vector<RemoteAnswer> answerMap;
@@ -854,9 +616,6 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
     arc->body->lock.lock();
     if (swept[sent] != INVALID_VERTEX){
         assert(swept[sent] == v);
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << " ignoring already known " << (sent & VERTEX_INDEX_MASK);
-#endif
         arc->body->lock.unlock();
         RemoteAnswer answer(this->get_id());
         std::vector<RemoteAnswer> answerMap;
@@ -864,21 +623,12 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
         return answerMap;
     }
 
-    /*
-    if (this->index == 1u){
-        arc->body->lock.unlock();
-        RemoteAnswer answer(this->get_id());
-        return answer;
-    }
-    */
+
     arc->body->queue.push(sent);
     //No boundary or augmentation initialization needed
 
     //Inject in possibly running sweep
     if (arc->body->state == 1) {
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << " injecting " << (sent & VERTEX_INDEX_MASK);
-#endif
         arc->body->lock.unlock();
         RemoteAnswer answer(this->get_id());
         std::vector<RemoteAnswer> answerMap;
@@ -907,7 +657,6 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
         arc->body->lock.unlock();
     }
 
-    //Couldn't we do this only on terminate?
     if ((arc->saddle == INVALID_VERTEX || this->dataManager->getValue(arc->saddle) > this->dataManager->getValue(min)) || swept[arc->saddle] == v)
         arc->saddle = min;
 
@@ -918,10 +667,6 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
     myWinner.minimum = min;
     myWinner.value = this->dataManager->getValue(min);
 
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "ContSweeploop empty for " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK) << " with min: " << (min >> BLOCK_INDEX_SHIFT) << "::" << (min & VERTEX_INDEX_MASK) << " awaiting remotes.";
-#endif
-
     arc->body->lock.unlock();
 
     AnswerMap answerMap = awaitRemoteAnswers(arc);
@@ -929,10 +674,6 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweep(uint64_t v, uint64_t c,
     if (myWinner.counter > answerMap[this->get_id()].counter){
         answerMap[this->get_id()] = myWinner;
     }
-
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "cont " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)  << " returns answerMap with size: " << answerMap.size();
-#endif
 
     std::vector<RemoteAnswer> answers;
     answers.reserve(answerMap.size());
@@ -953,18 +694,11 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweepPeer(uint64_t v, const s
     this->mapLock.unlock();
 
     Boundary& boundary = arc->body->boundary;
-    SweepQueue& queue = arc->body->queue;
 
-    //Should be identical?
     arc->body->children = children;
 
     //Sweep Startpoint
     this->swept[v] = v;
-
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Arc from " <<  (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK)
-                                                << " continuePeer finds childcount " << children.size();
-#endif
 
     //No Initial Fill except boundary intersections
     for (uint64_t child : children){
@@ -972,28 +706,14 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweepPeer(uint64_t v, const s
         this->UF[child] = v;
     }
 
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Arc from " << (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK)
-                                                << " continuePeer starts with min: "  <<  (boundary.min() >> BLOCK_INDEX_SHIFT) << "::" << (boundary.min() & VERTEX_INDEX_MASK);
-#endif
-
     // Mutual intersections of child boundaries -> this is where sweeps must continue
     mergeBoundaries(arc);
-
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Arc from " << (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK)
-                                                << " continuePeer extracted min from childboundaries:"  <<  (boundary.min() >> BLOCK_INDEX_SHIFT) << "::" << (boundary.min() & VERTEX_INDEX_MASK);
-#endif
 
     arc->body->augmentation.inherit(arc->body->inheritedAugmentations);
 
     //Inject in possibly running sweep
     arc->body->lock.lock();
     if (arc->body->state == 1){
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << " injecting old boundary intersection.";
-#endif
-
         arc->body->lock.unlock();
         RemoteAnswer answer(this->get_id());
         std::vector<RemoteAnswer> answerMap;
@@ -1040,9 +760,6 @@ std::vector<RemoteAnswer> TreeConstructor::continueSweepPeer(uint64_t v, const s
         answerMap[this->get_id()] = myWinner;
     }
 
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "cont returns answerMap with size: " << answerMap.size();
-#endif
     std::vector<RemoteAnswer> answers;
     answers.reserve(answerMap.size());
 
@@ -1065,55 +782,29 @@ bool TreeConstructor::terminateSweep(uint64_t v, Value s, std::vector<hpx::id_ty
             LogError().tag(std::to_string((this->index))) << "woopsie";
             arc->saddle = s.vertex;
         }
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "TerminateSweep removing from Boundary of: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-                                                    << " the vertex: " << (arc->saddle >> BLOCK_INDEX_SHIFT) << "::" << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
         arc->body->boundary.remove(s);
         this->assignSaddle(arc, s, peers);
 
-//#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Arc from " <<  (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK) << " to "  << (arc->saddle >> BLOCK_INDEX_SHIFT) << "::" << (arc->saddle & VERTEX_INDEX_MASK);
-//#endif
-
         graph.taskStop("terminate"+std::to_string(v), "terminate");
+
         // check if we can continue sweep at this saddle
         if (this->checkSaddle(arc->saddle)) {
             if (!done.occurred()){
-                assert(true);
-                assert(arc->saddle != INVALID_VERTEX);
-#ifdef ENABLE_DEBUG_LOGGING
-                LogDebug().tag(std::to_string(this->index)) << "cont starting next arc  " << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
                 return true;
             } else {
                 return false;
             }
         } else {
-#ifdef ENABLE_DEBUG_LOGGING
-            LogDebug().tag(std::to_string(this->index)) << "cont Checking saddle false" << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
             return false;
         }
     } else {
         std::vector<hpx::id_type> empty;
         arc->saddle = s.vertex;
         this->assignSaddle(arc, s, empty);
-#ifdef ENABLE_DEBUG_LOGGING
-        LogDebug().tag(std::to_string(this->index)) << "Informed about Arc from " <<  (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK) << " to "  << (arc->saddle >> BLOCK_INDEX_SHIFT) << "::" << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
-        graph.taskStop("terminate"+std::to_string(v), "terminate");
         return false;
     }
 }
 
-
-/**
- * @brief Fetches Arc from Map NOT! threadsafe
- * @param arc
- * @param v
- * @return True if Arc had to be created, False if Arc could be fetched
- */
 bool TreeConstructor::fetchCreateArc(Arc*& arc, uint64_t v){
     Profiler profiler(__func__);
     Arc*& tmparc = this->arcMap[v];
@@ -1144,7 +835,6 @@ void TreeConstructor::mergeBoundaries(Arc*& arc){
             arc->body->queue.push(childptr->body->boundary.intersect(child2ptr->body->boundary));
         }
 
-        //Is this Threadsafe?
         arc->body->boundary.unite(childptr->body->boundary);
     }
 }
@@ -1186,7 +876,7 @@ AnswerMap TreeConstructor::awaitRemoteAnswers(Arc *&arc){
         }
     }, myAnswers);
 
-    return std::move(answerMap);
+    return answerMap;
 }
 
 /**
@@ -1196,10 +886,6 @@ AnswerMap TreeConstructor::awaitRemoteAnswers(Arc *&arc){
  */
 void TreeConstructor::startSweep(uint64_t v, bool leaf)
 {
-
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Starting Sweep from " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK);
-#endif
     //Fetch Arc
     Arc* arc;
     this->mapLock.lock();
@@ -1207,9 +893,6 @@ void TreeConstructor::startSweep(uint64_t v, bool leaf)
     if (created) {
         arc->activate(this->dataManager, &swept);
         arc->body->leaf = true;
-    } else {
-
-        //arc->activate(this->dataManager, &swept);
     }
     this->mapLock.unlock();
 
@@ -1226,25 +909,15 @@ void TreeConstructor::startSweep(uint64_t v, bool leaf)
         return;
     }
 
-//    // Mutual intersections of child boundaries -> this is where sweeps must continue
+    // Mutual intersections of child boundaries -> this is where sweeps must continue
     mergeBoundaries(arc);
-
-//    for (int i = 0; (i < arc->body->children.size()); i++){
-//        std::uint64_t v = arc->body->children[i];
-//        arcMap[v]->deactivate();
-//    }
 
     arc->body->augmentation.inherit(arc->body->inheritedAugmentations); // gathered and merged here because no lock required here
     arc->body->augmentation.sweep(this->dataManager->getValue(v)); // also add saddle/local minimum to augmentation
-//#ifdef ENABLE_DEBUG_LOGGING
-//    LogDebug().tag(std::to_string(this->index)) << "StartSweep Augmenting: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                 << " to: " << (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK);
-//#endif
 
     if (done.occurred()){
         hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
         hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
-        graph.taskStop("start"+std::to_string(v), "startsweep");
         return;
     }
 
@@ -1269,10 +942,6 @@ void TreeConstructor::startSweep(uint64_t v, bool leaf)
         }
     }
 
-
-#ifdef ENABLE_DEBUG_LOGGING
-    LogDebug().tag(std::to_string(this->index)) << "Reminding" << arc->body->peers.size() <<  "peers of " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK);
-#endif
     //Call ContinueSweepPeer on all remote portions of v's cc
     arc->body->remoteCallLock.lock();
     for (hpx::id_type peer : arc->body->peers){
@@ -1299,35 +968,32 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
     this->mapLock.unlock();
 
     Boundary& boundary = arc->body->boundary;
-    SweepQueue& queue = arc->body->queue;
 
     uint64_t min;
 
 
-        this->sweepLoop(arc);
-        arc->body->lock.lock();
-        if (arc->body->queue.empty()){
-            arc->body->state = 2;
-            if (arc->body->boundary.empty()){
-                min = INVALID_VERTEX;
-            } else {
-                min = boundary.min();
-            }
+    this->sweepLoop(arc);
+    arc->body->lock.lock();
+    if (arc->body->queue.empty()){
+        arc->body->state = 2;
+        if (arc->body->boundary.empty()){
+            min = INVALID_VERTEX;
         } else {
-            if (done.occurred()){
-                arc->body->lock.unlock();
-                awaitRemoteAnswers(arc);
-                hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
-                hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
-                graph.taskStop("start"+std::to_string(v), "startsweep");
-                return;
-            } else {
-                arc->body->lock.unlock();
-                hpx::apply(TreeConstructor::continueLocalSweep_action(), this->get_id(), v);
-                return;
-            }
+            min = boundary.min();
         }
-
+    } else {
+        if (done.occurred()){
+            arc->body->lock.unlock();
+            awaitRemoteAnswers(arc);
+            hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
+            hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
+            return;
+        } else {
+            arc->body->lock.unlock();
+            hpx::apply(TreeConstructor::continueLocalSweep_action(), this->get_id(), v);
+            return;
+        }
+    }
 
     RemoteAnswer myWinner(this->get_id());
     myWinner.counter = ++arc->body->counter;
@@ -1336,23 +1002,17 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
 
     arc->body->lock.unlock();
 
-//#ifdef ENABLE_DEBUG_LOGGING
-//    LogDebug().tag(std::to_string(this->index)) << "Sweeploop empty for " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK) << " with min: " << (min >> BLOCK_INDEX_SHIFT) << "::" << (min & VERTEX_INDEX_MASK) << " awaiting remotes.";
-//#endif
     AnswerMap answerMap = awaitRemoteAnswers(arc);
     if (done.occurred()){
         hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
         hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
-        graph.taskStop("start"+std::to_string(v), "startsweep");
         return;
     }
 
     if (myWinner.counter > answerMap[this->get_id()].counter){
         answerMap[this->get_id()] = myWinner;
     }
-//#ifdef ENABLE_DEBUG_LOGGING
-//    LogDebug().tag(std::to_string(this->index)) << "Remotes of " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK) << " returned!";
-//#endif
+
     RemoteAnswer winner(this->get_id());
 
     for (auto& entry : answerMap){
@@ -1362,9 +1022,6 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
         }
     }
 
-//#ifdef ENABLE_DEBUG_LOGGING
-//    LogDebug().tag(std::to_string(this->index)) << "Remotes of " <<  (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK) << " resulted in winner: " << (winner.minimum >> BLOCK_INDEX_SHIFT) << "::" << (winner.minimum & VERTEX_INDEX_MASK);
-//#endif
     if (winner.minimum == INVALID_VERTEX){
         //Last sweep
         hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
@@ -1372,10 +1029,6 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
         return;
     } else {
         arc->saddle = winner.minimum;
-//#ifdef ENABLE_DEBUG_LOGGING
-//        LogDebug().tag(std::to_string(this->index)) << "StartSweep removing from Boundary of: " << (v >> BLOCK_INDEX_SHIFT) << "::" << (v & VERTEX_INDEX_MASK)
-//                                                    << " the vertex: " << (arc->saddle >> BLOCK_INDEX_SHIFT) << "::" << (arc->saddle & VERTEX_INDEX_MASK);
-//#endif
         boundary.remove(winner.value);
     }
 
@@ -1384,7 +1037,7 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
     for (auto& entry : answerMap){
         peers.push_back(entry.first);
     }
-    //peers.push_back(this->get_id());
+
     if (done.occurred()){
         hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
         hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
@@ -1393,17 +1046,6 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
 
     this->assignSaddle(arc, winner.value, peers);
 
-#ifdef FILEOUT
-    fileEntry entry;
-    entry.id1 = (hpx::async<TreeConstructor::convertToGlobal_action>(this->treeConstructors[arc->extremum >> BLOCK_INDEX_SHIFT], arc->extremum).get()) & VERTEX_INDEX_MASK;
-    entry.id2 = (hpx::async<TreeConstructor::convertToGlobal_action>(this->treeConstructors[arc->saddle  >> BLOCK_INDEX_SHIFT], arc->saddle).get()) & VERTEX_INDEX_MASK;
-    entry.time = this->clock.elapsed_microseconds();
-    entry.type = 1;
-    this->arcFileLock.lock();
-    this->arcFileEntries.push_back(entry);
-    this->arcFileLock.unlock();
-#endif
-
     std::vector<hpx::id_type> empty;
     std::vector<hpx::future<bool>> terminations;
     int winnerLoc;
@@ -1411,43 +1053,29 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
         if (peer == this->get_id())
             continue;
         if (peer == winner.location){
-            graph.taskStart("start"+std::to_string(v), "startsweep", "terminate"+std::to_string(v), "terminate");
             terminations.push_back(hpx::async<TreeConstructor::terminateSweep_action>(winner.location, v, winner.value, peers));
             winnerLoc = terminations.size()-1;
         } else {
-            graph.taskStart("start"+std::to_string(v), "startsweep", "terminate"+std::to_string(v), "terminate");
             terminations.push_back(hpx::async<TreeConstructor::terminateSweep_action>(peer, v, winner.value, empty));
         }
     }
 
     hpx::lcos::wait_all(terminations);
-#ifdef ENABLE_DEBUG_LOGGING
-    LogInfo().tag(std::to_string(this->index)) << "Arc from " <<  (arc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (arc->extremum & VERTEX_INDEX_MASK)
-                                              << " to "  << (arc->saddle >> BLOCK_INDEX_SHIFT) << "::" << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
     if (winner.location == this->get_id()){
         // check if we can continue sweep at this saddle
         if (this->checkSaddle(arc->saddle)) {
-#ifdef ENABLE_DEBUG_LOGGING
-            LogDebug().tag(std::to_string(this->index)) << "Checking saddle true" << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
             if (!done.occurred()){
-                graph.taskStart("start"+std::to_string(v), "startsweep", "start"+std::to_string(arc->saddle), "startsweep");
                 hpx::apply(this->executor_sweeps, TreeConstructor::startSweep_action(), winner.location, arc->saddle, false);
             } else {
                 hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
                 hpx::apply(this->executor_high, TreeConstructor::countSweeps_action(), this->treeConstructors[0], -1l);
             }
         } else {
-#ifdef ENABLE_DEBUG_LOGGING
-            LogDebug().tag(std::to_string(this->index)) << "Checking saddle false" << (arc->saddle & VERTEX_INDEX_MASK);
-#endif
             if (options.trunkskip) this->countSweepsLocal(-1l);
         }
     } else {
         if (terminations[winnerLoc].get()){
             if (!done.occurred()){
-                graph.taskStart("start"+std::to_string(v), "startsweep", "start"+std::to_string(arc->saddle), "startsweep");
                 hpx::apply(this->executor_sweeps, TreeConstructor::startSweep_action(), winner.location, arc->saddle, false);
             } else {
                 hpx::apply(this->executor_high, TreeConstructor::startTrunk_action(), this->treeConstructors[0], this->dataManager->getValue(arc->extremum));
@@ -1457,7 +1085,6 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
             if (options.trunkskip) this->countSweepsLocal(-1l);
         }
     }
-    graph.taskStop("start"+std::to_string(v), "startsweep");
     return;
 }
 
@@ -1467,12 +1094,6 @@ void TreeConstructor::continueLocalSweep(uint64_t v){
 bool TreeConstructor::searchUF(uint64_t start, uint64_t goal)
 {
     // goal is actively running sweep
-
-    // TODO distributed:
-    // - go through chain
-    // - if "cache miss" (no entry exists):
-    // if locality of required id is here: return false / and one which caused cache miss (which is still running) for others to path-compress
-    // else: send query to locality of required id -> wait for answer -> cache result locally
 
     if (start == INVALID_VERTEX)
         return false;
@@ -1526,7 +1147,6 @@ bool TreeConstructor::touch(uint64_t c, uint64_t v)
  */
 void TreeConstructor::assignSaddle(Arc* finishedArc, Value s, std::vector<hpx::naming::id_type> peers)
 {
-    //Profiler profiler(__func__);
     this->mapLock.lock();
     Arc* saddleArc = arcMap[finishedArc->saddle]; // parent of finished arc
     if (saddleArc == nullptr) {
@@ -1534,17 +1154,14 @@ void TreeConstructor::assignSaddle(Arc* finishedArc, Value s, std::vector<hpx::n
         arcMap[finishedArc->saddle] = saddleArc;
         saddleArc->activate(this->dataManager, &swept);
     }
+
     this->mapLock.unlock();
 
     saddleArc->body->lock.lock();
     saddleArc->body->children.push_back(finishedArc->extremum);
-//#ifdef ENABLE_DEBUG_LOGGING
-//    LogDebug().tag(std::to_string(this->index)) << "Next Arc " <<  (saddleArc->extremum >> BLOCK_INDEX_SHIFT) << "::" << (saddleArc->extremum & VERTEX_INDEX_MASK)
-//                                                << " assignSaddle adds child: " << (finishedArc->extremum  >> BLOCK_INDEX_SHIFT) << "::" << (finishedArc->extremum  & VERTEX_INDEX_MASK);
-//#endif
 
-    Augmentation bob = finishedArc->body->augmentation.heritage(s);
-    saddleArc->body->inheritedAugmentations.push_back(bob);
+    Augmentation heritage = finishedArc->body->augmentation.heritage(s);
+    saddleArc->body->inheritedAugmentations.push_back(heritage);
 #ifdef VTIOUT
 #ifndef FLATAUGMENTATION
     for (auto iter = finishedArc->body->augmentation.vertices.begin(); (iter != finishedArc->body->augmentation.vertices.end()); iter.operator ++()){
@@ -1556,26 +1173,13 @@ void TreeConstructor::assignSaddle(Arc* finishedArc, Value s, std::vector<hpx::n
     }
 #endif
 #endif
-    //    for (auto iter = bob.vertices.begin(); (iter != bob.vertices.end()); iter.operator ++()){
-    //    LogDebug().tag(std::to_string(this->index)) << "Inheriting "
-    //                                                << ( (*iter)->key.vertex  >> BLOCK_INDEX_SHIFT) << "::" << ( (*iter)->key.vertex  & VERTEX_INDEX_MASK) << " from "
-    //                                                << ( finishedArc->extremum  >> BLOCK_INDEX_SHIFT) << "::" << ( finishedArc->extremum  & VERTEX_INDEX_MASK) << " to "
-    //                                                << ( saddleArc->extremum  >> BLOCK_INDEX_SHIFT) << "::" << ( saddleArc->extremum  & VERTEX_INDEX_MASK);
-    //    }
-    //    for (auto iter = finishedArc->body->augmentation.vertices.begin(); (iter != finishedArc->body->augmentation.vertices.end()); iter.operator ++()){
-    //    LogDebug().tag(std::to_string(this->index)) << "Not Inheriting "
-    //                                                << ( (*iter)->key.vertex  >> BLOCK_INDEX_SHIFT) << "::" << ( (*iter)->key.vertex  & VERTEX_INDEX_MASK) << " from "
-    //                                                << ( finishedArc->extremum  >> BLOCK_INDEX_SHIFT) << "::" << ( finishedArc->extremum  & VERTEX_INDEX_MASK) << " to "
-    //                                                << ( saddleArc->extremum  >> BLOCK_INDEX_SHIFT) << "::" << ( saddleArc->extremum  & VERTEX_INDEX_MASK);
-    //    }
 
     for (hpx::id_type peer : peers)
         saddleArc->body->peers.insert(peer);
 
     // Update union find structure: finished arc belongs to saddle arc
-    this->UF[finishedArc->extremum] = saddleArc->extremum; // TODO distributed: nothing changes here
+    this->UF[finishedArc->extremum] = saddleArc->extremum;
     saddleArc->body->lock.unlock();
-    //finishedArc->deactivate();
 }
 
 /*
@@ -1588,9 +1192,6 @@ bool TreeConstructor::checkSaddle(uint64_t s)
     this->mapLock.lock();
     Arc* branch = this->arcMap[s];
     this->mapLock.unlock();
-
-//    if (branch->body == nullptr)  checkSaddles can arrive wayyy after even the saddle has found its saddle
-//        return false;
 
     // Make sure only one checkSaddle call continues sweep
     std::lock_guard<hpx::lcos::local::mutex> lock(branch->body->lock);

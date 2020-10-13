@@ -13,65 +13,6 @@
 #include <glm/glm.hpp>
 #include <hpx/hpx.hpp>
 
-
-#ifdef ENABLE_TASKGRAPH_LOGGING
-class TaskGraph {
-private:
-    hpx::lcos::local::mutex lock;
-    std::ofstream file;
-    hpx::util::high_resolution_timer timer;
-
-public:
-    void init(std::string outfile){
-        file.open(outfile + std::to_string(hpx::get_locality_id()), std::ios_base::out);
-        file << "Entry Type, TaskID, TaskType, TargetID, TargetType, Time \n";
-        timer.restart();
-    }
-
-    void taskStart(std::string id, std::string type, std::string targetid, std::string targettype){
-        lock.lock();
-        file << "start, " << id << "," << type << "," << targetid << "," << targettype << "," << std::to_string(timer.elapsed()) << "\n";
-        lock.unlock();
-    }
-
-    void taskWait(){
-        lock.lock();
-        lock.unlock();
-    }
-
-    void taskStop(std::string id, std::string type){
-        lock.lock();
-        file << "stop, " << id << "," << type << ",0,0," << std::to_string(timer.elapsed()) << "\n";
-        lock.unlock();
-    }
-
-    ~TaskGraph(){
-        file.close();
-    }
-};
-#else
-class TaskGraph {
-
-public:
-    void init(std::string outfile){
-    }
-
-    void taskStart(std::string id, std::string type, std::string targetid, std::string targettype){
-
-    }
-
-    void taskWait(){
-    }
-
-    void taskStop(std::string id, std::string type){
-    }
-
-    ~TaskGraph(){
-    }
-};
-#endif
-
-
 /**
  * @brief Logging utility class.
  */
@@ -88,17 +29,6 @@ public:
 public:
     static std::ofstream outfile;
     static hpx::lcos::local::mutex outlock;
-    //static hpx::util::high_resolution_timer timer;
-
-    static void init(std::string path){
-               //outfile.open(path+std::to_string(hpx::get_locality_id()), std::ios_base::out);
-                //timer.restart();
-               Log() << "Created log file: " << path+std::to_string(hpx::get_locality_id());
-    }
-
-    static void closeFile(){
-        //outfile.close();
-    }
 
 public:
     Log(Level level = Level::INFO_LEVEL)
@@ -109,11 +39,6 @@ public:
 
     virtual ~Log()
     {
-//        if (this->level == Level::DEBUG_LEVEL){
-//            if (timer.elapsed() < 600)
-//                return;
-//        }
-
         std::ostream* out = &std::cout;
         std::lock_guard<hpx::lcos::local::mutex> lock(Log::outlock);
         if (this->level == Level::FILE_LEVEL){
