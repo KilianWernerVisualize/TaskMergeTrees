@@ -16,6 +16,7 @@ cmake --build .
 
 ls
 cp output_0.vti /results/
+cp output.vtp /results/
 
 popd
 
