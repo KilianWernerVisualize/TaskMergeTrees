@@ -18,7 +18,6 @@
 
 std::ofstream Log::outfile;
 hpx::lcos::local::mutex Log::outlock;
-//hpx::util::high_resolution_timer Log::timer;
 
 #include "TreeConstructor.h"
 
@@ -33,9 +32,6 @@ int hpx_main(boost::program_options::variables_map& vm)
      * Parse command line
      */
     std::string input;
-
-    Log::init(input+"_out");
-
 
     Options options;
     options.trunkskip = true;
@@ -106,11 +102,6 @@ int hpx_main(boost::program_options::variables_map& vm)
     }
 
     Log() << "Construction: " << timer.elapsed() << " s; Total Arcs: " << finalArcCount;
-    if (result == 0ul)
-        result = finalArcCount;
-    else if (result != finalArcCount){
-        LogError() << "DEVIATION!";
-    }
 
     timer.restart();
     // Destroy
@@ -122,10 +113,6 @@ int hpx_main(boost::program_options::variables_map& vm)
     }
 
     Log() << "Destruction: " << timer.elapsed() << " s";
-
-    Log::closeFile();
-
-    Log() << "Closed File";
 
     return hpx::finalize();
 }
