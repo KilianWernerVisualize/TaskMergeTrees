@@ -88,7 +88,7 @@ pushd build
 
 cmake -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
-      ../src
+      ../code/src
 
 cmake --build .
 
