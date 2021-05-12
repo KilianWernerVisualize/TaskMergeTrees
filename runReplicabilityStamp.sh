@@ -88,16 +88,16 @@ pushd build
 
 cmake -G Ninja \
       -DCMAKE_BUILD_TYPE=Release \
-      code/src
+      ../code/src
 
 cmake --build .
 
 ./hpxct \
-    /data/ctBones.vti \
-   	| tee /results/output
+    ../data/ctBones.vti \
+   	| tee ../results/output
 
 ls
-cp output_0.vti /results/
-cp output.vtp /results/
+cp output_0.vti ../results/
+cp output.vtp ../results/
 
 popd
