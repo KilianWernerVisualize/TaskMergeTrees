@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #Assume Ubuntu Linux 18.04.3
-apt-get update \
+sudo apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential=12.4ubuntu1 \
         cmake=3.10.2-1ubuntu2.18.04.1 \
@@ -49,7 +49,7 @@ cmake -G Ninja \
       -D CMAKE_INSTALL_PREFIX=/usr \
       ../teem-source
 
-cmake --build . --target install
+sudo cmake --build . --target install
 
 popd
 
@@ -75,7 +75,7 @@ cmake -G Ninja \
       -D HPX_WITH_PAPI=ON \
       ../hpx-source
 
-cmake --build . --target install
+sudo cmake --build . --target install
 
 popd
 
