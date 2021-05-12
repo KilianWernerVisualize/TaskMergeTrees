@@ -4,8 +4,8 @@ apt-get update \
     && apt-get install -y --no-install-recommends \
         build-essential=12.4ubuntu1 \
         cmake=3.10.2-1ubuntu2.18.04.1 \
-        curl=7.58.0-2ubuntu3.9 \
-        git=1:2.17.1-1ubuntu0.7 \
+        curl=7.58.0-2ubuntu3.13 \
+        git=1:2.17.1-1ubuntu1 \
         libblosc-dev=1.14.2+ds1-1 \
         libboost-atomic-dev=1.65.1.0ubuntu1 \
         libboost-chrono-dev=1.65.1.0ubuntu1 \
