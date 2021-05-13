@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #Assume Ubuntu Linux 18.04.3
 sudo apt-get update \
-    && apt-get install -y --no-install-recommends \
+    && sudo apt-get install -y --no-install-recommends \
         build-essential=12.4ubuntu1 \
         cmake=3.10.2-1ubuntu2.18.04.1 \
         curl=7.58.0-2ubuntu3.13 \
