@@ -92,6 +92,8 @@ cmake -G Ninja \
 
 cmake --build .
 
+mkdir  ../results/
+
 ./hpxct \
     ../data/ctBones.vti \
    	| tee ../results/output
